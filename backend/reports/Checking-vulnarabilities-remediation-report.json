@@ -1,0 +1,680 @@
+{
+  "filename": "Checking-vulnarabilities.yaml",
+  "created_at": "2026-06-02T18:33:12.988965Z",
+  "trusted_report_before": {
+    "summary": "20 failed Checkov checks were detected.",
+    "issues": [
+      {
+        "check_id": "CKV_K8S_12",
+        "check_name": "Memory requests should be set",
+        "severity": "medium",
+        "problem": "Memory requests should be set",
+        "risk": "Without memory requests, Kubernetes cannot schedule the pod reliably and the workload may cause resource pressure.",
+        "fix": "Add resources.requests.memory to the container.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/resources/requests/memory"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_16",
+        "check_name": "Container should not be privileged",
+        "severity": "high",
+        "problem": "Container should not be privileged",
+        "risk": "A privileged container can access host-level resources and may increase the impact of container escape.",
+        "fix": "Set securityContext.privileged to false.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/securityContext/privileged"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_38",
+        "check_name": "Ensure that Service Account Tokens are only mounted where necessary",
+        "severity": "medium",
+        "problem": "Ensure that Service Account Tokens are only mounted where necessary",
+        "risk": "Automatically mounted service account tokens may expose Kubernetes API credentials to workloads that do not need Kubernetes API access.",
+        "fix": "Set automountServiceAccountToken: false unless the pod needs Kubernetes API access.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_20",
+        "check_name": "Containers should not run with allowPrivilegeEscalation",
+        "severity": "high",
+        "problem": "Containers should not run with allowPrivilegeEscalation",
+        "risk": "Privilege escalation may allow a process inside the container to gain more privileges than intended.",
+        "fix": "Set securityContext.allowPrivilegeEscalation to false.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/securityContext/allowPrivilegeEscalation"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_10",
+        "check_name": "CPU requests should be set",
+        "severity": "medium",
+        "problem": "CPU requests should be set",
+        "risk": "Without CPU requests, Kubernetes cannot reserve CPU capacity properly for the workload.",
+        "fix": "Add resources.requests.cpu to the container.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/resources/requests/cpu"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_37",
+        "check_name": "Minimize the admission of containers with capabilities assigned",
+        "severity": "medium",
+        "problem": "Minimize the admission of containers with capabilities assigned",
+        "risk": "Containers with unnecessary Linux capabilities have a larger attack surface.",
+        "fix": "Drop all unnecessary capabilities, preferably with capabilities.drop: ['ALL'].",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/securityContext/capabilities/drop"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_9",
+        "check_name": "Readiness Probe Should be Configured",
+        "severity": "low",
+        "problem": "Readiness Probe Should be Configured",
+        "risk": "Without a readiness probe, Kubernetes may send traffic to a pod before it is ready.",
+        "fix": "Add a readinessProbe to the container.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/readinessProbe"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_8",
+        "check_name": "Liveness Probe Should be Configured",
+        "severity": "low",
+        "problem": "Liveness Probe Should be Configured",
+        "risk": "Without a liveness probe, Kubernetes may not automatically restart an unhealthy container.",
+        "fix": "Add a livenessProbe to the container.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/livenessProbe"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_14",
+        "check_name": "Image Tag should be fixed - not latest or blank",
+        "severity": "medium",
+        "problem": "Image Tag should be fixed - not latest or blank",
+        "risk": "Using the latest image tag makes deployments non-reproducible and may introduce unreviewed image changes.",
+        "fix": "Use a fixed image tag instead of latest, for example nginx:1.25.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/image"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_29",
+        "check_name": "Apply security context to your pods and containers",
+        "severity": "medium",
+        "problem": "Apply security context to your pods and containers",
+        "risk": "Missing pod/container security context weakens workload isolation.",
+        "fix": "Define pod and container securityContext settings such as runAsNonRoot and seccompProfile.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_11",
+        "check_name": "CPU limits should be set",
+        "severity": "medium",
+        "problem": "CPU limits should be set",
+        "risk": "Without CPU limits, a container may consume excessive CPU and affect other workloads.",
+        "fix": "Add resources.limits.cpu to the container.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/resources/limits/cpu"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_43",
+        "check_name": "Image should use digest",
+        "severity": "medium",
+        "problem": "Image should use digest",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/image"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "medium"
+      },
+      {
+        "check_id": "CKV_K8S_21",
+        "check_name": "The default namespace should not be used",
+        "severity": "medium",
+        "problem": "The default namespace should not be used",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "medium"
+      },
+      {
+        "check_id": "CKV_K8S_23",
+        "check_name": "Minimize the admission of root containers",
+        "severity": "medium",
+        "problem": "Minimize the admission of root containers",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "medium"
+      },
+      {
+        "check_id": "CKV_K8S_31",
+        "check_name": "Ensure that the seccomp profile is set to docker/default or runtime/default",
+        "severity": "medium",
+        "problem": "Ensure that the seccomp profile is set to docker/default or runtime/default",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "medium"
+      },
+      {
+        "check_id": "CKV_K8S_22",
+        "check_name": "Use read-only filesystem for containers where possible",
+        "severity": "medium",
+        "problem": "Use read-only filesystem for containers where possible",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/securityContext/readOnlyRootFilesystem"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "medium"
+      },
+      {
+        "check_id": "CKV_K8S_28",
+        "check_name": "Minimize the admission of containers with the NET_RAW capability",
+        "severity": "medium",
+        "problem": "Minimize the admission of containers with the NET_RAW capability",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/securityContext/capabilities/drop"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "medium"
+      },
+      {
+        "check_id": "CKV_K8S_40",
+        "check_name": "Containers should run as a high UID to avoid host conflict",
+        "severity": "medium",
+        "problem": "Containers should run as a high UID to avoid host conflict",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "medium"
+      },
+      {
+        "check_id": "CKV_K8S_13",
+        "check_name": "Memory limits should be set",
+        "severity": "medium",
+        "problem": "Memory limits should be set",
+        "risk": "Without memory limits, a container may consume excessive memory and affect node stability.",
+        "fix": "Add resources.limits.memory to the container.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/resources/limits/memory"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV2_K8S_6",
+        "check_name": "Minimize the admission of pods which lack an associated NetworkPolicy",
+        "severity": "medium",
+        "problem": "Minimize the admission of pods which lack an associated NetworkPolicy",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "resource_type"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "confidence": "medium"
+      }
+    ],
+    "final_recommendation": "Apply the listed remediations and rescan the manifest with Checkov."
+  },
+  "patch_plan": {
+    "patches": [
+      {
+        "check_id": "CKV_K8S_16",
+        "path": "spec.containers.0.securityContext.privileged",
+        "action": "set",
+        "value": false
+      },
+      {
+        "check_id": "CKV_K8S_20",
+        "path": "spec.containers.0.securityContext.allowPrivilegeEscalation",
+        "action": "set",
+        "value": false
+      },
+      {
+        "check_id": "CKV_K8S_14",
+        "path": "spec.containers.0.image",
+        "action": "set",
+        "value": "nginx:1.25"
+      },
+      {
+        "check_id": "CKV_K8S_10",
+        "path": "spec.containers.0.resources.requests.cpu",
+        "action": "set",
+        "value": "100m"
+      },
+      {
+        "check_id": "CKV_K8S_12",
+        "path": "spec.containers.0.resources.requests.memory",
+        "action": "set",
+        "value": "512Mi"
+      }
+    ]
+  },
+  "fixed_yaml": "apiVersion: v1\nkind: Pod\nmetadata:\n  name: insecure-pod\nspec:\n  containers:\n  - name: app\n    image: nginx:1.25\n    securityContext:\n      privileged: false\n      allowPrivilegeEscalation: false\n    resources:\n      requests:\n        cpu: 100m\n        memory: 512Mi\n",
+  "trusted_report_after": {
+    "summary": "16 failed Checkov checks were detected.",
+    "issues": [
+      {
+        "check_id": "CKV_K8S_38",
+        "check_name": "Ensure that Service Account Tokens are only mounted where necessary",
+        "severity": "medium",
+        "problem": "Ensure that Service Account Tokens are only mounted where necessary",
+        "risk": "Automatically mounted service account tokens may expose Kubernetes API credentials to workloads that do not need Kubernetes API access.",
+        "fix": "Set automountServiceAccountToken: false unless the pod needs Kubernetes API access.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          15
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_15",
+        "check_name": "Image Pull Policy should be Always",
+        "severity": "medium",
+        "problem": "Image Pull Policy should be Always",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/image",
+          "spec/containers/[0]/imagePullPolicy"
+        ],
+        "file_line_range": [
+          1,
+          15
+        ],
+        "confidence": "medium"
+      },
+      {
+        "check_id": "CKV_K8S_37",
+        "check_name": "Minimize the admission of containers with capabilities assigned",
+        "severity": "medium",
+        "problem": "Minimize the admission of containers with capabilities assigned",
+        "risk": "Containers with unnecessary Linux capabilities have a larger attack surface.",
+        "fix": "Drop all unnecessary capabilities, preferably with capabilities.drop: ['ALL'].",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/securityContext/capabilities/drop"
+        ],
+        "file_line_range": [
+          1,
+          15
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_9",
+        "check_name": "Readiness Probe Should be Configured",
+        "severity": "low",
+        "problem": "Readiness Probe Should be Configured",
+        "risk": "Without a readiness probe, Kubernetes may send traffic to a pod before it is ready.",
+        "fix": "Add a readinessProbe to the container.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/readinessProbe"
+        ],
+        "file_line_range": [
+          1,
+          15
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_8",
+        "check_name": "Liveness Probe Should be Configured",
+        "severity": "low",
+        "problem": "Liveness Probe Should be Configured",
+        "risk": "Without a liveness probe, Kubernetes may not automatically restart an unhealthy container.",
+        "fix": "Add a livenessProbe to the container.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/livenessProbe"
+        ],
+        "file_line_range": [
+          1,
+          15
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_29",
+        "check_name": "Apply security context to your pods and containers",
+        "severity": "medium",
+        "problem": "Apply security context to your pods and containers",
+        "risk": "Missing pod/container security context weakens workload isolation.",
+        "fix": "Define pod and container securityContext settings such as runAsNonRoot and seccompProfile.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          15
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_11",
+        "check_name": "CPU limits should be set",
+        "severity": "medium",
+        "problem": "CPU limits should be set",
+        "risk": "Without CPU limits, a container may consume excessive CPU and affect other workloads.",
+        "fix": "Add resources.limits.cpu to the container.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/resources/limits/cpu"
+        ],
+        "file_line_range": [
+          1,
+          15
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_43",
+        "check_name": "Image should use digest",
+        "severity": "medium",
+        "problem": "Image should use digest",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/image"
+        ],
+        "file_line_range": [
+          1,
+          15
+        ],
+        "confidence": "medium"
+      },
+      {
+        "check_id": "CKV_K8S_21",
+        "check_name": "The default namespace should not be used",
+        "severity": "medium",
+        "problem": "The default namespace should not be used",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          15
+        ],
+        "confidence": "medium"
+      },
+      {
+        "check_id": "CKV_K8S_23",
+        "check_name": "Minimize the admission of root containers",
+        "severity": "medium",
+        "problem": "Minimize the admission of root containers",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          15
+        ],
+        "confidence": "medium"
+      },
+      {
+        "check_id": "CKV_K8S_31",
+        "check_name": "Ensure that the seccomp profile is set to docker/default or runtime/default",
+        "severity": "medium",
+        "problem": "Ensure that the seccomp profile is set to docker/default or runtime/default",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          15
+        ],
+        "confidence": "medium"
+      },
+      {
+        "check_id": "CKV_K8S_22",
+        "check_name": "Use read-only filesystem for containers where possible",
+        "severity": "medium",
+        "problem": "Use read-only filesystem for containers where possible",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/securityContext/readOnlyRootFilesystem"
+        ],
+        "file_line_range": [
+          1,
+          15
+        ],
+        "confidence": "medium"
+      },
+      {
+        "check_id": "CKV_K8S_28",
+        "check_name": "Minimize the admission of containers with the NET_RAW capability",
+        "severity": "medium",
+        "problem": "Minimize the admission of containers with the NET_RAW capability",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/securityContext/capabilities/drop"
+        ],
+        "file_line_range": [
+          1,
+          15
+        ],
+        "confidence": "medium"
+      },
+      {
+        "check_id": "CKV_K8S_40",
+        "check_name": "Containers should run as a high UID to avoid host conflict",
+        "severity": "medium",
+        "problem": "Containers should run as a high UID to avoid host conflict",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          15
+        ],
+        "confidence": "medium"
+      },
+      {
+        "check_id": "CKV_K8S_13",
+        "check_name": "Memory limits should be set",
+        "severity": "medium",
+        "problem": "Memory limits should be set",
+        "risk": "Without memory limits, a container may consume excessive memory and affect node stability.",
+        "fix": "Add resources.limits.memory to the container.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "spec/containers/[0]/resources/limits/memory"
+        ],
+        "file_line_range": [
+          1,
+          15
+        ],
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV2_K8S_6",
+        "check_name": "Minimize the admission of pods which lack an associated NetworkPolicy",
+        "severity": "medium",
+        "problem": "Minimize the admission of pods which lack an associated NetworkPolicy",
+        "risk": "This issue was detected by Checkov and should be reviewed according to the Checkov policy guidance.",
+        "fix": "Review the evaluated key and update the Kubernetes manifest according to the Checkov finding.",
+        "resource": "Pod.default.insecure-pod",
+        "evaluated_keys": [
+          "resource_type"
+        ],
+        "file_line_range": [
+          1,
+          15
+        ],
+        "confidence": "medium"
+      }
+    ],
+    "final_recommendation": "Apply the listed remediations and rescan the manifest with Checkov."
+  },
+  "comparison": {
+    "before_count": 20,
+    "after_count": 16,
+    "fixed_count": 5,
+    "remaining_count": 15,
+    "new_count": 1,
+    "fixed_check_ids": [
+      "CKV_K8S_10",
+      "CKV_K8S_12",
+      "CKV_K8S_14",
+      "CKV_K8S_16",
+      "CKV_K8S_20"
+    ],
+    "remaining_check_ids": [
+      "CKV2_K8S_6",
+      "CKV_K8S_11",
+      "CKV_K8S_13",
+      "CKV_K8S_21",
+      "CKV_K8S_22",
+      "CKV_K8S_23",
+      "CKV_K8S_28",
+      "CKV_K8S_29",
+      "CKV_K8S_31",
+      "CKV_K8S_37",
+      "CKV_K8S_38",
+      "CKV_K8S_40",
+      "CKV_K8S_43",
+      "CKV_K8S_8",
+      "CKV_K8S_9"
+    ],
+    "new_check_ids": [
+      "CKV_K8S_15"
+    ]
+  },
+  "llm_explanation": {
+    "summary": "The number of security checks passed has increased, indicating improvements in the Kubernetes configuration.",
+    "fixed_explanation": "Five specific security checks (CKV_K8S_10, CKV_K8S_12, CKV_K8S_14, CKV_K8S_16, CKV_K8S_20) have been successfully remediated, reducing the number of vulnerabilities.",
+    "remaining_risks": "Seventeen security checks still need to be addressed (CKV2_K8S_6, CKV_K8S_11, CKV_K8S_13, CKV_K8S_21, CKV_K8S_22, CKV_K8S_23, CKV_K8S_28, CKV_K8S_29, CKV_K8S_31, CKV_K8S_37, CKV_K8S_38, CKV_K8S_40, CKV_K8S_43, CKV_K8S_8, CKV_K8S_9). These checks highlight areas that require further attention to enhance the security posture of the Kubernetes environment.",
+    "next_step": "Continue addressing the remaining security checks and monitor the cluster for any new vulnerabilities. Implement automated tools or manual reviews as necessary to ensure compliance with best practices."
+  }
+}

@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+uploads/
+fixed_outputs/
+vector_store/
+models/
+*.log
+.DS_Store
