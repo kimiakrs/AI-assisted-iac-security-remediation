@@ -1,14 +1,9 @@
+import os
+import copy
 import yaml
 
 
-def convert_value(value):
-    if value == "true":
-        return True
-
-    if value == "false":
-        return False
-
-    return value
+FIXED_DIR = "fixed"
 
 
 def set_nested_value(data, path: str, value):
@@ -26,46 +21,84 @@ def set_nested_value(data, path: str, value):
     last = parts[-1]
 
     if last.isdigit():
-        current[int(last)] = convert_value(value)
+        current[int(last)] = value
     else:
-        current[last] = convert_value(value)
+        current[last] = value
 
 
-def apply_patch_plan(original_path: str, patch_plan: dict) -> dict:
-    with open(original_path, "r") as f:
-        data = yaml.safe_load(f)
+def apply_patch_plan(file_path: str, patch_plan: dict) -> dict:
+    if "error" in patch_plan:
+        return {
+            "status": "failed",
+            "reason": "Patch plan contains error",
+            "patch_plan": patch_plan,
+        }
 
     patches = patch_plan.get("patches", [])
 
     if not patches:
         return {
-            "status": "no_patches",
-            "patch_plan": patch_plan
+            "status": "failed",
+            "reason": "No patches found in patch plan",
+            "patch_plan": patch_plan,
         }
 
-    for patch in patches:
-        path = patch.get("path")
-        value = patch.get("value")
+    try:
+        with open(file_path, "r") as f:
+            original_yaml = yaml.safe_load(f)
 
-        if not path:
-            continue
+        fixed_yaml_data = copy.deepcopy(original_yaml)
 
-        set_nested_value(data, path, value)
+        applied_patches = []
 
-    fixed_path = (
-        original_path
-        .replace(".yaml", "-patched.yaml")
-        .replace(".yml", "-patched.yml")
-    )
+        for patch in patches:
+            action = patch.get("action")
+            path = patch.get("path")
+            value = patch.get("value")
 
-    fixed_yaml = yaml.safe_dump(data, sort_keys=False)
+            if action != "set":
+                applied_patches.append({
+                    "patch": patch,
+                    "status": "skipped",
+                    "reason": "Unsupported action"
+                })
+                continue
 
-    with open(fixed_path, "w") as f:
-        f.write(fixed_yaml)
+            if not path:
+                applied_patches.append({
+                    "patch": patch,
+                    "status": "skipped",
+                    "reason": "Missing path"
+                })
+                continue
 
-    return {
-        "status": "success",
-        "fixed_path": fixed_path,
-        "fixed_yaml": fixed_yaml,
-        "patch_plan": patch_plan
-    }
+            set_nested_value(fixed_yaml_data, path, value)
+
+            applied_patches.append({
+                "patch": patch,
+                "status": "applied"
+            })
+
+        os.makedirs(FIXED_DIR, exist_ok=True)
+
+        filename = os.path.basename(file_path)
+        fixed_path = os.path.join(FIXED_DIR, f"fixed-{filename}")
+
+        with open(fixed_path, "w") as f:
+            yaml.safe_dump(fixed_yaml_data, f, sort_keys=False)
+
+        fixed_yaml_text = yaml.safe_dump(fixed_yaml_data, sort_keys=False)
+
+        return {
+            "status": "success",
+            "fixed_path": fixed_path,
+            "fixed_yaml": fixed_yaml_text,
+            "applied_patches": applied_patches,
+        }
+
+    except Exception as e:
+        return {
+            "status": "failed",
+            "reason": str(e),
+            "patch_plan": patch_plan,
+        }

@@ -11,15 +11,15 @@ from app.services.patch_apply_service import apply_patch_plan
 from app.services.comparison_service import compare_reports
 from app.services.explanation_service import explain_remediation_result
 from app.services.report_writer_service import save_remediation_report
-from app.services.rag_policy_service import (
-    analyze_unknown_findings_with_rag,
-    analyze_unknown_issue,
-)
+from app.services.rag_policy_service import analyze_unknown_issue
 from app.services.rag_retriever_service import retrieve_context
+from app.services.external_policy_service import (
+    enrich_rag_context_with_external_sources,
+    search_external_policy_context,
+)
 
 
 router = APIRouter(prefix="/scan", tags=["Scan"])
-
 UPLOAD_DIR = "uploads"
 
 logging.basicConfig(level=logging.INFO)
@@ -45,6 +45,35 @@ def detect_file_type(filename: str) -> str:
         return "dockerfile"
 
     return "unknown"
+
+
+def build_rag_query_from_report(trusted_report: dict) -> str:
+    issues = trusted_report.get("issues", [])
+    query_parts = []
+
+    for issue in issues:
+        check_id = issue.get("check_id", "")
+        check_name = issue.get("check_name", "")
+        problem = issue.get("problem", "")
+        query_parts.append(f"{check_id} {check_name} {problem}")
+
+    return " ".join(query_parts).strip()
+
+
+def get_enriched_rag_context(trusted_report: dict) -> tuple[str, list]:
+    rag_query = build_rag_query_from_report(trusted_report)
+
+    logger.info("Retrieving local RAG context")
+    rag_context = retrieve_context(rag_query)
+
+    logger.info("Enriching RAG context with structured external sources")
+    rag_context = enrich_rag_context_with_external_sources(
+        issues=trusted_report.get("issues", []),
+        local_rag_context=rag_context,
+        max_issues=5,
+    )
+
+    return rag_query, rag_context
 
 
 @router.post("/upload")
@@ -112,53 +141,57 @@ async def patch_plan_test(filename: str):
     trusted_report = build_deterministic_report(scan_result)
     logger.info("STEP 5 - Trusted report built")
 
-    logger.info("STEP 6 - Generating patch plan")
-    patch_plan = generate_patch_plan(trusted_report)
-    logger.info("STEP 7 - Patch plan generated")
+    logger.info("STEP 6 - Retrieving local + external RAG context")
+    rag_query, rag_context = get_enriched_rag_context(trusted_report)
+    logger.info("STEP 7 - RAG context ready")
+
+    logger.info("STEP 8 - Generating patch plan")
+    patch_plan = generate_patch_plan(
+        trusted_report=trusted_report,
+        rag_context=rag_context,
+    )
+    logger.info("STEP 9 - Patch plan generated")
 
     if "error" in patch_plan:
         return {
             "status": "patch_plan_failed",
             "filename": filename,
             "trusted_report": trusted_report,
+            "rag_query": rag_query,
+            "rag_context_used_for_patch": rag_context,
             "patch_plan": patch_plan,
         }
 
-    logger.info("STEP 8 - Applying patch")
+    logger.info("STEP 10 - Applying patch")
     applied_patch = apply_patch_plan(file_path, patch_plan)
-    logger.info("STEP 9 - Patch applied")
+    logger.info("STEP 11 - Patch applied")
 
     if applied_patch.get("status") != "success":
         return {
             "status": "patch_apply_failed",
             "filename": filename,
             "trusted_report": trusted_report,
+            "rag_query": rag_query,
+            "rag_context_used_for_patch": rag_context,
             "patch_plan": patch_plan,
             "applied_patch": applied_patch,
         }
 
-    logger.info("STEP 10 - Checkov rescan started")
+    logger.info("STEP 12 - Checkov rescan started")
     rescan_result = run_checkov(applied_patch["fixed_path"])
-    logger.info("STEP 11 - Checkov rescan finished")
+    logger.info("STEP 13 - Checkov rescan finished")
 
-    logger.info("STEP 12 - Building fixed report")
+    logger.info("STEP 14 - Building fixed report")
     fixed_report = build_deterministic_report(rescan_result)
-    logger.info("STEP 13 - Fixed report built")
+    logger.info("STEP 15 - Fixed report built")
 
-    logger.info("STEP 14 - Comparing reports")
+    logger.info("STEP 16 - Comparing reports")
     comparison = compare_reports(trusted_report, fixed_report)
-    logger.info("STEP 15 - Comparison finished")
+    logger.info("STEP 17 - Comparison finished")
 
-    logger.info("STEP 16 - LLM explanation started")
+    logger.info("STEP 18 - LLM explanation started")
     llm_explanation = explain_remediation_result(comparison)
-    logger.info("STEP 17 - LLM explanation finished")
-
-    logger.info("STEP 18 - RAG unknown analysis started")
-    rag_unknown_analysis = analyze_unknown_findings_with_rag(
-        trusted_report_before=trusted_report,
-        trusted_report_after=fixed_report,
-    )
-    logger.info("STEP 19 - RAG unknown analysis finished")
+    logger.info("STEP 19 - LLM explanation finished")
 
     logger.info("STEP 20 - Saving remediation report")
     saved_report = save_remediation_report(
@@ -169,7 +202,7 @@ async def patch_plan_test(filename: str):
         trusted_report_after=fixed_report,
         comparison=comparison,
         llm_explanation=llm_explanation,
-        rag_unknown_analysis=rag_unknown_analysis,
+        rag_unknown_analysis=None,
     )
     logger.info("STEP 21 - Remediation report saved")
 
@@ -179,12 +212,13 @@ async def patch_plan_test(filename: str):
         "original_file": file_path,
         "fixed_file": applied_patch["fixed_path"],
         "trusted_report_before": trusted_report,
+        "rag_query": rag_query,
+        "rag_context_used_for_patch": rag_context,
         "patch_plan": patch_plan,
         "fixed_yaml": applied_patch["fixed_yaml"],
         "trusted_report_after": fixed_report,
         "comparison": comparison,
         "llm_explanation": llm_explanation,
-        "rag_unknown_analysis": rag_unknown_analysis,
         "report_path": saved_report["report_path"],
     }
 
@@ -221,13 +255,22 @@ async def debug_patch_plan(filename: str):
 
     scan_result = run_checkov(file_path)
     trusted_report = build_deterministic_report(scan_result)
-    patch_plan = generate_patch_plan(trusted_report)
+
+    rag_query, rag_context = get_enriched_rag_context(trusted_report)
+
+    patch_plan = generate_patch_plan(
+        trusted_report=trusted_report,
+        rag_context=rag_context,
+    )
 
     logger.info("DEBUG PATCH PLAN - finished")
 
     return {
         "status": "patch_plan_ok",
         "filename": filename,
+        "trusted_report": trusted_report,
+        "rag_query": rag_query,
+        "rag_context": rag_context,
         "patch_plan": patch_plan,
     }
 
@@ -243,7 +286,14 @@ async def debug_apply_patch(filename: str):
 
     scan_result = run_checkov(file_path)
     trusted_report = build_deterministic_report(scan_result)
-    patch_plan = generate_patch_plan(trusted_report)
+
+    rag_query, rag_context = get_enriched_rag_context(trusted_report)
+
+    patch_plan = generate_patch_plan(
+        trusted_report=trusted_report,
+        rag_context=rag_context,
+    )
+
     applied_patch = apply_patch_plan(file_path, patch_plan)
 
     logger.info("DEBUG APPLY PATCH - finished")
@@ -251,6 +301,10 @@ async def debug_apply_patch(filename: str):
     return {
         "status": "apply_patch_ok",
         "filename": filename,
+        "trusted_report": trusted_report,
+        "rag_query": rag_query,
+        "rag_context": rag_context,
+        "patch_plan": patch_plan,
         "applied_patch": applied_patch,
     }
 
@@ -267,6 +321,28 @@ async def debug_rag_retrieve(query: str):
         "status": "rag_retrieve_ok",
         "query": query,
         "context": context,
+    }
+
+
+@router.get("/debug/external-policy")
+async def debug_external_policy(check_id: str, check_name: str = ""):
+    logger.info("DEBUG EXTERNAL POLICY - started")
+
+    issue = {
+        "check_id": check_id,
+        "check_name": check_name,
+        "problem": "",
+        "risk": "",
+        "fix": "",
+    }
+
+    result = search_external_policy_context(issue)
+
+    logger.info("DEBUG EXTERNAL POLICY - finished")
+
+    return {
+        "status": "external_policy_ok",
+        "result": result,
     }
 
 

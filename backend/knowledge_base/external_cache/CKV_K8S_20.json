@@ -1,0 +1,20 @@
+{
+  "check_id": "CKV_K8S_20",
+  "check_name": "Containers should not run with allowPrivilegeEscalation",
+  "external_context": [
+    {
+      "source": "external_policy_context",
+      "url": "https://www.checkov.io/7.Scan%20Examples/Kubernetes.html",
+      "check_id": "CKV_K8S_20",
+      "check_name": "Containers should not run with allowPrivilegeEscalation",
+      "text": "External policy context for CKV_K8S_20\n\nCheck name:\nContainers should not run with allowPrivilegeEscalation\n\nProblem from trusted Checkov report:\nContainers should not run with allowPrivilegeEscalation\n\nRisk from trusted Checkov report:\nPrivilege escalation may allow a process inside the container to gain more privileges than intended.\n\nFix from trusted Checkov report:\nSet securityContext.allowPrivilegeEscalation to false.\n\nRelevant external extract:\n3  | kind: Pod\n4  | metadata:\n5  |   name: pod1\n6  | spec:\n7  |   containers:\n8  |   - name: main\n9  |     image: alpine\n10 |     command: [\"/bin/sleep\", \"999999\"]\nCheck: CKV_K8S_20: \"Containers should not run with allowPrivilegeEscalation\"\nFAILED for resource: Pod.default.pod1\nFile: /rootContainersFAILED.yaml:2-10\nGuide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-19\n2  | apiVersion: v1"
+    },
+    {
+      "source": "external_policy_context",
+      "url": "https://github.com/bridgecrewio/checkov",
+      "check_id": "CKV_K8S_20",
+      "check_name": "Containers should not run with allowPrivilegeEscalation",
+      "text": "External policy context for CKV_K8S_20\n\nCheck name:\nContainers should not run with allowPrivilegeEscalation\n\nProblem from trusted Checkov report:\nContainers should not run with allowPrivilegeEscalation\n\nRisk from trusted Checkov report:\nPrivilege escalation may allow a process inside the container to gain more privileges than intended.\n\nFix from trusted Checkov report:\nSet securityContext.allowPrivilegeEscalation to false.\n\nRelevant external extract:\nTo suppress checks in Kubernetes manifests, annotations are used with the following format:\ncheckov.io/skip#: <check_id>=<suppression_comment>\nFor example:\napiVersion: v1\nkind: Pod\nmetadata:\nname: mypod\nannotations:\ncheckov.io/skip1: CKV_K8S_20=I don\n'\nt care about Privilege Escalation :-O\ncheckov.io/skip2: CKV_K8S_14\ncheckov.io/skip3: CKV_K8S_11=I have not set CPU limits as I want BestEffort QoS\nspec:\ncontainers:\n..."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "check_id": "CKV_K8S_38",
+  "check_name": "Ensure that Service Account Tokens are only mounted where necessary",
+  "external_context": [
+    {
+      "source": "external_policy_context",
+      "url": "https://www.checkov.io/7.Scan%20Examples/Kubernetes.html",
+      "check_id": "CKV_K8S_38",
+      "check_name": "Ensure that Service Account Tokens are only mounted where necessary",
+      "text": "External policy context for CKV_K8S_38\n\nCheck name:\nEnsure that Service Account Tokens are only mounted where necessary\n\nProblem from trusted Checkov report:\nEnsure that Service Account Tokens are only mounted where necessary\n\nRisk from trusted Checkov report:\nAutomatically mounted service account tokens may expose Kubernetes API credentials to workloads that do not need Kubernetes API access.\n\nFix from trusted Checkov report:\nSet automountServiceAccountToken to false unless the pod needs Kubernetes API access.\n\nRelevant external extract:\n3  | kind: Pod\n4  | metadata:\n5  |   name: pod1\n6  | spec:\n7  |   containers:\n8  |   - name: main\n9  |     image: alpine\n10 |     command: [\"/bin/sleep\", \"999999\"]\nCheck: CKV_K8S_38: \"Ensure that Service Account Tokens are only mounted where necessary\"\nFAILED for resource: Pod.default.pod1\nFile: /rootContainersFAILED.yaml:2-10\nGuide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc_k8s_35\n2  | apiVersion: v1"
+    },
+    {
+      "source": "external_policy_context",
+      "url": "https://github.com/bridgecrewio/checkov",
+      "check_id": "CKV_K8S_38",
+      "check_name": "Ensure that Service Account Tokens are only mounted where necessary",
+      "text": "External policy context for CKV_K8S_38\n\nCheck name:\nEnsure that Service Account Tokens are only mounted where necessary\n\nProblem from trusted Checkov report:\nEnsure that Service Account Tokens are only mounted where necessary\n\nRisk from trusted Checkov report:\nAutomatically mounted service account tokens may expose Kubernetes API credentials to workloads that do not need Kubernetes API access.\n\nFix from trusted Checkov report:\nSet automountServiceAccountToken to false unless the pod needs Kubernetes API access.\n\nRelevant external extract:\nNo exact external section found. Use trusted Checkov report as primary source."
+    }
+  ]
+}
