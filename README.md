@@ -1,108 +1,216 @@
-# AI-assisted Kubernetes Security Remediation Copilot
+# Agentic AI-Assisted Kubernetes Security Remediation Copilot
 
-This project is an AI-assisted Infrastructure-as-Code security remediation pipeline for Kubernetes manifests.
+An AI-assisted DevSecOps pipeline for automatically analyzing, planning, validating, and remediating Kubernetes Infrastructure-as-Code (IaC) security misconfigurations.
 
-It combines deterministic security scanning with Checkov, local RAG retrieval, external policy enrichment, an Ollama-based LLM patch planner, strict patch validation, YAML patch application, and Checkov rescan verification.
+The project combines deterministic security scanning with Retrieval-Augmented Generation (RAG), an LLM-based patch planner, a structured remediation catalog, backend validation, and an agentic remediation workflow that continuously verifies its own actions before applying security fixes.
 
-## Project Goal
+---
 
-The goal is not to blindly ask an LLM to fix Kubernetes YAML.
+# Project Overview
 
-Instead, the system uses a controlled remediation workflow:
+Unlike traditional AI code assistants, this project does **not** allow the LLM to directly modify Kubernetes manifests.
 
-1. Checkov detects Kubernetes security findings.
-2. The backend creates a deterministic trusted report.
-3. Local RAG retrieves relevant policy knowledge.
-4. External policy context is added when local knowledge is missing.
-5. The LLM generates a constrained JSON patch plan.
-6. The backend validates the patch plan.
-7. Safe patches are applied to the YAML file.
-8. Checkov rescans the fixed file.
-9. The system compares before/after results.
+Instead, the system follows a secure remediation pipeline inspired by modern security copilots such as GitHub Copilot Autofix and Amazon Q Developer.
 
-## Pipeline
+The LLM acts as a constrained planning component, while deterministic tools remain the source of truth for security findings and verification.
+
+---
+
+# High-Level Architecture
 
 ```text
-Kubernetes YAML
-    ↓
+                User Upload
+                     │
+                     ▼
+          Scanner Tool (Checkov)
+                     │
+                     ▼
+        Trusted Security Report
+                     │
+                     ▼
+        RAG Retrieval Tool
+   (Local Knowledge + External Policy)
+                     │
+                     ▼
+         Remediation Catalog
+                     │
+                     ▼
+       LLM Patch Planner Tool
+                     │
+                     ▼
+        Backend Patch Validator
+                     │
+                     ▼
+         YAML Patch Apply Tool
+                     │
+                     ▼
+      Verification Tool (Checkov)
+                     │
+                     ▼
+          Coordinator Agent
+                     │
+          Continue Remediation?
+             │               │
+            Yes              No
+             │               │
+             └──────► Final Report
+```
+
+---
+
+# Agentic Remediation Workflow
+
+The system follows an Observe → Plan → Act → Verify → Decide loop.
+
+## 1. Observe
+
+- Scan Kubernetes YAML using Checkov
+- Generate a deterministic trusted security report
+
+## 2. Plan
+
+- Retrieve relevant security documentation using Local RAG
+- Enrich missing information with external policy retrieval
+- Consult the remediation catalog
+- Generate constrained remediation patches using the LLM
+
+## 3. Act
+
+- Validate every generated patch
+- Apply only validated patches
+
+## 4. Verify
+
+- Rescan the modified manifest
+- Compare security findings before and after remediation
+
+## 5. Decide
+
+The Coordinator Agent determines whether:
+
+- more automatic remediations are available
+- no improvement was achieved
+- only manual findings remain
+- all findings have been resolved
+
+If additional supported remediations exist, another iteration begins.
+
+Otherwise, the workflow terminates and generates the final report.
+
+---
+
+# Security Pipeline
+
+```text
+Kubernetes Manifest
+        │
+        ▼
 Checkov Scan
-    ↓
-Trusted Deterministic Report
-    ↓
-Local RAG Retrieval
-    ↓
-External Policy Enrichment
-    ↓
-LLM Patch Plan
-    ↓
+        │
+        ▼
+Trusted Security Report
+        │
+        ▼
+RAG Context Retrieval
+(Local + External)
+        │
+        ▼
+Remediation Catalog Lookup
+        │
+        ▼
+LLM Patch Planning
+        │
+        ▼
 Patch Validation
-    ↓
-Patch Apply
-    ↓
+        │
+        ▼
+Patch Application
+        │
+        ▼
 Checkov Rescan
-    ↓
-Before/After Comparison
-    ↓
-Final Remediation Report
+        │
+        ▼
+Comparison
+        │
+        ▼
+Agent Decision
+        │
+        ▼
+Final Report
 ```
 
-## Main Components
+---
 
-### FastAPI Backend
+# Core Components
 
-The backend exposes debug and remediation endpoints under:
+## Scanner Tool
 
-```text
-/scan
-```
+Uses **Checkov** as the deterministic source of truth.
 
-Important endpoints:
+The LLM never determines whether a vulnerability exists.
 
-```text
-POST /scan/debug/checkov
-POST /scan/debug/patch-plan
-POST /scan/debug/apply-patch
-POST /scan/patch-plan-test
-GET  /scan/debug/rag-retrieve
-GET  /scan/debug/external-policy
-```
+---
 
-### Checkov Scanner
+## Trusted Report Builder
 
-Checkov is used as the deterministic source of truth. The LLM does not decide which vulnerabilities exist.
+Converts raw Checkov output into a normalized security report containing:
 
-### Trusted Report Builder
+- Check ID
+- Check Name
+- Severity
+- Problem
+- Risk
+- Suggested Fix
+- Resource
+- Evaluated Keys
 
-Raw Checkov output is converted into a structured report containing:
+---
 
-* check_id
-* check_name
-* severity
-* classification
-* problem
-* risk
-* fix
-* resource
-* evaluated keys
-* confidence
+## Local RAG
 
-### Local RAG
+The project uses
 
-The local RAG layer uses:
+- SentenceTransformer (all-MiniLM-L6-v2)
+- FAISS
+- Local Kubernetes security knowledge base
 
-* SentenceTransformer: `all-MiniLM-L6-v2`
-* FAISS vector index
-* local Kubernetes policy knowledge base
+to retrieve policy information relevant to each finding.
 
-### External Policy Enrichment
+---
 
-If the local RAG context does not contain the required Checkov policy ID, the system retrieves external policy context from trusted sources and converts it into structured context before sending it to the LLM.
+## External Policy Enrichment
 
-### LLM Patch Planner
+If local knowledge is insufficient, additional policy context is retrieved from trusted external documentation.
 
-The LLM generates only JSON patch plans. It does not directly modify YAML.
+---
 
-Example patch plan:
+## Remediation Catalog
+
+A structured knowledge base describing supported remediations.
+
+Each Checkov rule is classified as either
+
+- Automatic Remediation
+- Manual Remediation
+
+Automatic entries contain
+
+- supported YAML path
+- allowed action
+- validated value
+- remediation rationale
+
+Manual entries explain why human intervention is required.
+
+---
+
+## LLM Patch Planner
+
+The LLM never edits YAML directly.
+
+Instead, it produces constrained JSON patch plans.
+
+Example:
 
 ```json
 {
@@ -117,29 +225,66 @@ Example patch plan:
 }
 ```
 
-### Patch Validator
+---
 
-Before applying a patch, the backend validates that:
+## Patch Validator
 
-* the check_id exists in the trusted Checkov findings
-* the action is supported
-* the path is allowed
-* the value exists
-* boolean-like strings are normalized
+Before any modification is applied, the backend verifies:
 
-This prevents hallucinated or unsafe LLM patches from being applied.
+- Check ID exists
+- Remediation is supported
+- YAML path is allowed
+- Action is valid
+- Value matches the remediation catalog
 
-### Patch Apply
+Only validated patches are accepted.
 
-Validated patches are applied to the Kubernetes YAML and written to the `fixed/` directory.
+---
 
-### Rescan
+## Patch Apply Tool
 
-The fixed file is rescanned with Checkov to verify whether findings were actually resolved.
+Validated patches are applied to the Kubernetes manifest.
 
-## Example Test
+Modified manifests are written into
 
-Create a vulnerable Kubernetes manifest:
+```
+fixed/
+```
+
+---
+
+## Verification Tool
+
+The updated manifest is rescanned using Checkov.
+
+The system verifies that findings were actually resolved before considering remediation successful.
+
+---
+
+## Coordinator Agent
+
+The Coordinator Agent orchestrates all system components.
+
+Available tools include:
+
+- Scanner Tool
+- Trusted Report Builder
+- Local RAG Tool
+- External Policy Tool
+- Remediation Catalog
+- Patch Planner Tool
+- Patch Validator
+- Patch Apply Tool
+- Verification Tool
+- Report Writer
+
+The Coordinator Agent determines whether another remediation iteration should be executed.
+
+---
+
+# Example
+
+Input
 
 ```yaml
 apiVersion: v1
@@ -154,82 +299,122 @@ spec:
         allowPrivilegeEscalation: true
 ```
 
-Run:
+↓
 
-```bash
-curl -X POST \
-"http://127.0.0.1:8000/scan/debug/apply-patch?filename=test-auto.yaml"
+Generated Patch
+
+```json
+{
+  "patches": [
+    {
+      "check_id": "CKV_K8S_20",
+      "path": "spec.containers.0.securityContext.allowPrivilegeEscalation",
+      "action": "set",
+      "value": false
+    }
+  ]
+}
 ```
 
-Expected fixed result:
+↓
+
+Output
 
 ```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: test-auto
-spec:
-  containers:
-  - name: nginx
-    image: nginx:1.25
-    securityContext:
-      allowPrivilegeEscalation: false
+securityContext:
+  allowPrivilegeEscalation: false
 ```
 
-## Safety Design
+↓
 
-The LLM is not trusted blindly.
-
-The system follows this principle:
+Verification
 
 ```text
-Checkov = source of truth
-RAG = policy context
-LLM = patch planner
-Validator = safety gate
-Checkov rescan = verification
+Before Scan
+------------
+Failed Findings : 1
+
+After Scan
+-----------
+Failed Findings : 0
 ```
 
-## Current Supported Auto-fix Examples
+---
 
-Examples of safely patchable findings:
+# Safety Model
 
-* CKV_K8S_20: disable privilege escalation
-* CKV_K8S_16: disable privileged container
-* CKV_K8S_10: add CPU requests
-* CKV_K8S_12: add memory requests
-* CKV_K8S_11: add CPU limits
-* CKV_K8S_13: add memory limits
-* CKV_K8S_38: disable unnecessary service account token mounting
-* CKV_K8S_37: drop Linux capabilities
-* CKV_K8S_22: enable read-only root filesystem
+The project follows the following trust hierarchy:
 
-Findings that need application context, such as NetworkPolicy, readiness/liveness probes, image digests, namespaces, and runtime users, should not be blindly auto-patched.
+```text
+Checkov
+        │
+        ▼
+Trusted Report
+        │
+        ▼
+RAG Context
+        │
+        ▼
+Remediation Catalog
+        │
+        ▼
+LLM Patch Planning
+        │
+        ▼
+Patch Validation
+        │
+        ▼
+Patch Application
+        │
+        ▼
+Checkov Verification
+```
 
-## Tech Stack
+The LLM is never treated as the source of truth.
 
-* Python
-* FastAPI
-* Checkov
-* Ollama
-* FAISS
-* SentenceTransformers
-* BeautifulSoup
-* Kubernetes YAML
-* Local RAG
-* External policy enrichment
+---
 
-## Project Status
+# Technology Stack
 
-The current implementation successfully demonstrates:
+- Python
+- FastAPI
+- Checkov
+- Ollama
+- FAISS
+- SentenceTransformers
+- BeautifulSoup
+- Kubernetes
+- YAML
+- Retrieval-Augmented Generation (RAG)
 
-* Checkov scanning
-* deterministic report generation
-* local RAG retrieval
-* external policy enrichment
-* LLM patch planning
-* patch validation
-* YAML patch application
-* fixed YAML generation
+---
 
-The next improvement is to enhance external policy retrieval with more targeted policy-specific search and better source ranking.
+# Current Features
+
+- Deterministic Kubernetes security scanning
+- Trusted security report generation
+- Local FAISS-based RAG
+- External policy enrichment
+- Structured remediation catalog
+- LLM-based constrained patch planning
+- Backend patch validation
+- Safe YAML patch application
+- Automatic Checkov verification
+- Agentic Observe–Plan–Act–Verify remediation workflow
+- Detailed remediation reports
+
+---
+
+# Roadmap
+
+Future improvements include:
+
+- Expand remediation catalog to support additional Checkov policies
+- Terraform remediation support
+- Dockerfile remediation support
+- Human approval workflow before applying patches
+- GitHub Pull Request generation
+- Kubernetes deployment
+- CI/CD integration with Jenkins
+- Multi-repository support
+- Support for additional security scanners
