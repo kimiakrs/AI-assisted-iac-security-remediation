@@ -1,0 +1,834 @@
+{
+  "filename": "test-auto.yaml",
+  "created_at": "20260702-145555",
+  "trusted_report_before": {
+    "summary": "19 failed Checkov checks were detected.",
+    "total_failed_checks": 19,
+    "returned_findings": 19,
+    "issues": [
+      {
+        "check_id": "CKV_K8S_12",
+        "check_name": "Memory requests should be set",
+        "severity": "medium",
+        "classification": "auto_fixable",
+        "problem": "Memory requests should be set",
+        "risk": "Without memory requests, Kubernetes cannot schedule the pod reliably and the workload may cause resource pressure.",
+        "fix": "Add resources.requests.memory to the container.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [
+          "spec/containers/[0]/resources/requests/memory"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-11",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_38",
+        "check_name": "Ensure that Service Account Tokens are only mounted where necessary",
+        "severity": "medium",
+        "classification": "auto_fixable",
+        "problem": "Ensure that Service Account Tokens are only mounted where necessary",
+        "risk": "Automatically mounted service account tokens may expose Kubernetes API credentials to workloads that do not need Kubernetes API access.",
+        "fix": "Set automountServiceAccountToken to false unless the pod needs Kubernetes API access.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-35",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_15",
+        "check_name": "Image Pull Policy should be Always",
+        "severity": "medium",
+        "classification": "needs_context",
+        "problem": "Image Pull Policy should be Always",
+        "risk": "Image pull policy can affect image freshness and deployment behavior.",
+        "fix": "Set imagePullPolicy according to the deployment strategy.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [
+          "spec/containers/[0]/image",
+          "spec/containers/[0]/imagePullPolicy"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-14",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_20",
+        "check_name": "Containers should not run with allowPrivilegeEscalation",
+        "severity": "high",
+        "classification": "auto_fixable",
+        "problem": "Containers should not run with allowPrivilegeEscalation",
+        "risk": "Privilege escalation may allow a process inside the container to gain more privileges than intended.",
+        "fix": "Set securityContext.allowPrivilegeEscalation to false.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [
+          "spec/containers/[0]/securityContext/allowPrivilegeEscalation"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-19",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_10",
+        "check_name": "CPU requests should be set",
+        "severity": "medium",
+        "classification": "auto_fixable",
+        "problem": "CPU requests should be set",
+        "risk": "Without CPU requests, Kubernetes cannot reserve CPU capacity properly for the workload.",
+        "fix": "Add resources.requests.cpu to the container.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [
+          "spec/containers/[0]/resources/requests/cpu"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-9",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_37",
+        "check_name": "Minimize the admission of containers with capabilities assigned",
+        "severity": "medium",
+        "classification": "auto_fixable",
+        "problem": "Minimize the admission of containers with capabilities assigned",
+        "risk": "Containers with unnecessary Linux capabilities have a larger attack surface.",
+        "fix": "Drop all unnecessary capabilities, preferably with capabilities.drop: ['ALL'].",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [
+          "spec/containers/[0]/securityContext/capabilities/drop"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-34",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_9",
+        "check_name": "Readiness Probe Should be Configured",
+        "severity": "low",
+        "classification": "needs_context",
+        "problem": "Readiness Probe Should be Configured",
+        "risk": "Without a readiness probe, Kubernetes may send traffic to a pod before it is ready.",
+        "fix": "Add a readinessProbe based on the application's readiness endpoint or command.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [
+          "spec/containers/[0]/readinessProbe"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-8",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_8",
+        "check_name": "Liveness Probe Should be Configured",
+        "severity": "low",
+        "classification": "needs_context",
+        "problem": "Liveness Probe Should be Configured",
+        "risk": "Without a liveness probe, Kubernetes may not automatically restart an unhealthy container.",
+        "fix": "Add a livenessProbe based on the application's health endpoint or command.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [
+          "spec/containers/[0]/livenessProbe"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-7",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_29",
+        "check_name": "Apply security context to your pods and containers",
+        "severity": "medium",
+        "classification": "needs_context",
+        "problem": "Apply security context to your pods and containers",
+        "risk": "Missing pod/container security context weakens workload isolation.",
+        "fix": "Define pod and container securityContext settings such as runAsNonRoot and seccompProfile.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/ensure-securitycontext-is-applied-to-pods-and-containers",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_11",
+        "check_name": "CPU limits should be set",
+        "severity": "medium",
+        "classification": "auto_fixable",
+        "problem": "CPU limits should be set",
+        "risk": "Without CPU limits, a container may consume excessive CPU and affect other workloads.",
+        "fix": "Add resources.limits.cpu to the container.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [
+          "spec/containers/[0]/resources/limits/cpu"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-10",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_43",
+        "check_name": "Image should use digest",
+        "severity": "medium",
+        "classification": "needs_context",
+        "problem": "Image should use digest",
+        "risk": "Image tags can change over time; digest pinning improves reproducibility.",
+        "fix": "Use an image digest after resolving the correct digest from the trusted container registry.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [
+          "spec/containers/[0]/image"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-39",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_21",
+        "check_name": "The default namespace should not be used",
+        "severity": "medium",
+        "classification": "needs_context",
+        "problem": "The default namespace should not be used",
+        "risk": "Running workloads in the default namespace weakens environment separation.",
+        "fix": "Move the workload to an application-specific namespace after confirming the correct namespace strategy.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-20",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_23",
+        "check_name": "Minimize the admission of root containers",
+        "severity": "medium",
+        "classification": "needs_context",
+        "problem": "Minimize the admission of root containers",
+        "risk": "Running as root increases the impact of container compromise.",
+        "fix": "Set runAsNonRoot and runAsUser after confirming the application supports a non-root UID.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-22",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_31",
+        "check_name": "Ensure that the seccomp profile is set to docker/default or runtime/default",
+        "severity": "medium",
+        "classification": "needs_context",
+        "problem": "Ensure that the seccomp profile is set to docker/default or runtime/default",
+        "risk": "Missing seccomp profile reduces syscall-level isolation.",
+        "fix": "Set seccompProfile to RuntimeDefault where supported.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-29",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_22",
+        "check_name": "Use read-only filesystem for containers where possible",
+        "severity": "medium",
+        "classification": "auto_fixable",
+        "problem": "Use read-only filesystem for containers where possible",
+        "risk": "A writable root filesystem can allow attackers to modify files inside the container.",
+        "fix": "Set securityContext.readOnlyRootFilesystem to true where the application supports it.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [
+          "spec/containers/[0]/securityContext/readOnlyRootFilesystem"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-21",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_28",
+        "check_name": "Minimize the admission of containers with the NET_RAW capability",
+        "severity": "medium",
+        "classification": "unknown",
+        "problem": "Minimize the admission of containers with the NET_RAW capability",
+        "risk": "This issue was detected by Checkov and should be reviewed using external policy guidance.",
+        "fix": "Retrieve external policy guidance and review the Kubernetes manifest manually.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [
+          "spec/containers/[0]/securityContext/capabilities/drop"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-27",
+        "confidence": "low"
+      },
+      {
+        "check_id": "CKV_K8S_40",
+        "check_name": "Containers should run as a high UID to avoid host conflict",
+        "severity": "medium",
+        "classification": "needs_context",
+        "problem": "Containers should run as a high UID to avoid host conflict",
+        "risk": "Low UIDs may conflict with host users or increase risk in some runtime configurations.",
+        "fix": "Set runAsUser to a high non-root UID after confirming application compatibility.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-37",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_13",
+        "check_name": "Memory limits should be set",
+        "severity": "medium",
+        "classification": "auto_fixable",
+        "problem": "Memory limits should be set",
+        "risk": "Without memory limits, a container may consume excessive memory and affect node stability.",
+        "fix": "Add resources.limits.memory to the container.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [
+          "spec/containers/[0]/resources/limits/memory"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-12",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV2_K8S_6",
+        "check_name": "Minimize the admission of pods which lack an associated NetworkPolicy",
+        "severity": "medium",
+        "classification": "needs_context",
+        "problem": "Minimize the admission of pods which lack an associated NetworkPolicy",
+        "risk": "Pods without NetworkPolicy may allow unrestricted network traffic.",
+        "fix": "Create a NetworkPolicy after confirming required ingress, egress, ports, namespaces, and pod labels.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/uploads/test-auto.yaml",
+        "evaluated_keys": [
+          "resource_type"
+        ],
+        "file_line_range": [
+          1,
+          10
+        ],
+        "guideline": null,
+        "confidence": "high"
+      }
+    ],
+    "final_recommendation": "Apply safe auto-fixable remediations, generate guidance for context-dependent findings, and rescan with Checkov."
+  },
+  "patch_plan": {
+    "patches": [
+      {
+        "check_id": "CKV_K8S_12",
+        "path": "spec.containers.0.resources.requests.memory",
+        "action": "set",
+        "value": "128Mi"
+      },
+      {
+        "check_id": "CKV_K8S_20",
+        "path": "spec.containers.0.securityContext.allowPrivilegeEscalation",
+        "action": "set",
+        "value": false
+      },
+      {
+        "check_id": "CKV_K8S_10",
+        "path": "spec.containers.0.resources.requests.cpu",
+        "action": "set",
+        "value": "100m"
+      },
+      {
+        "check_id": "CKV_K8S_37",
+        "path": "spec.containers.0.securityContext.capabilities.drop",
+        "action": "set",
+        "value": [
+          "ALL"
+        ]
+      },
+      {
+        "check_id": "CKV_K8S_11",
+        "path": "spec.containers.0.resources.limits.cpu",
+        "action": "set",
+        "value": "500m"
+      },
+      {
+        "check_id": "CKV_K8S_22",
+        "path": "spec.containers.0.securityContext.readOnlyRootFilesystem",
+        "action": "set",
+        "value": true
+      },
+      {
+        "check_id": "CKV_K8S_13",
+        "path": "spec.containers.0.resources.limits.memory",
+        "action": "set",
+        "value": "512Mi"
+      }
+    ],
+    "rejected_patches": [
+      {
+        "patch": {
+          "check_id": "CKV_K8S_38",
+          "path": "spec.containers[0].automountServiceAccountToken",
+          "action": "set",
+          "value": false
+        },
+        "reason": "Invalid path. Expected: spec.automountServiceAccountToken"
+      }
+    ],
+    "manual_recommendations": [
+      {
+        "check_id": "CKV_K8S_15",
+        "check_name": "Image Pull Policy should be Always",
+        "classification": "needs_context",
+        "problem": "Image Pull Policy should be Always",
+        "risk": "Image pull policy can affect image freshness and deployment behavior.",
+        "recommendation": "Set imagePullPolicy according to the deployment strategy.",
+        "resource": "Pod.default.test-auto",
+        "evaluated_keys": [
+          "spec/containers/[0]/image",
+          "spec/containers/[0]/imagePullPolicy"
+        ],
+        "reason": "This finding was not auto-applied because it requires application context or has no validated safe patch rule."
+      },
+      {
+        "check_id": "CKV_K8S_9",
+        "check_name": "Readiness Probe Should be Configured",
+        "classification": "needs_context",
+        "problem": "Readiness Probe Should be Configured",
+        "risk": "Without a readiness probe, Kubernetes may send traffic to a pod before it is ready.",
+        "recommendation": "Add a readinessProbe based on the application's readiness endpoint or command.",
+        "resource": "Pod.default.test-auto",
+        "evaluated_keys": [
+          "spec/containers/[0]/readinessProbe"
+        ],
+        "reason": "This finding was not auto-applied because it requires application context or has no validated safe patch rule."
+      },
+      {
+        "check_id": "CKV_K8S_8",
+        "check_name": "Liveness Probe Should be Configured",
+        "classification": "needs_context",
+        "problem": "Liveness Probe Should be Configured",
+        "risk": "Without a liveness probe, Kubernetes may not automatically restart an unhealthy container.",
+        "recommendation": "Add a livenessProbe based on the application's health endpoint or command.",
+        "resource": "Pod.default.test-auto",
+        "evaluated_keys": [
+          "spec/containers/[0]/livenessProbe"
+        ],
+        "reason": "This finding was not auto-applied because it requires application context or has no validated safe patch rule."
+      },
+      {
+        "check_id": "CKV_K8S_29",
+        "check_name": "Apply security context to your pods and containers",
+        "classification": "needs_context",
+        "problem": "Apply security context to your pods and containers",
+        "risk": "Missing pod/container security context weakens workload isolation.",
+        "recommendation": "Define pod and container securityContext settings such as runAsNonRoot and seccompProfile.",
+        "resource": "Pod.default.test-auto",
+        "evaluated_keys": [],
+        "reason": "This finding was not auto-applied because it requires application context or has no validated safe patch rule."
+      },
+      {
+        "check_id": "CKV_K8S_43",
+        "check_name": "Image should use digest",
+        "classification": "needs_context",
+        "problem": "Image should use digest",
+        "risk": "Image tags can change over time; digest pinning improves reproducibility.",
+        "recommendation": "Use an image digest after resolving the correct digest from the trusted container registry.",
+        "resource": "Pod.default.test-auto",
+        "evaluated_keys": [
+          "spec/containers/[0]/image"
+        ],
+        "reason": "This finding was not auto-applied because it requires application context or has no validated safe patch rule."
+      },
+      {
+        "check_id": "CKV_K8S_21",
+        "check_name": "The default namespace should not be used",
+        "classification": "needs_context",
+        "problem": "The default namespace should not be used",
+        "risk": "Running workloads in the default namespace weakens environment separation.",
+        "recommendation": "Move the workload to an application-specific namespace after confirming the correct namespace strategy.",
+        "resource": "Pod.default.test-auto",
+        "evaluated_keys": [],
+        "reason": "This finding was not auto-applied because it requires application context or has no validated safe patch rule."
+      },
+      {
+        "check_id": "CKV_K8S_23",
+        "check_name": "Minimize the admission of root containers",
+        "classification": "needs_context",
+        "problem": "Minimize the admission of root containers",
+        "risk": "Running as root increases the impact of container compromise.",
+        "recommendation": "Set runAsNonRoot and runAsUser after confirming the application supports a non-root UID.",
+        "resource": "Pod.default.test-auto",
+        "evaluated_keys": [],
+        "reason": "This finding was not auto-applied because it requires application context or has no validated safe patch rule."
+      },
+      {
+        "check_id": "CKV_K8S_31",
+        "check_name": "Ensure that the seccomp profile is set to docker/default or runtime/default",
+        "classification": "needs_context",
+        "problem": "Ensure that the seccomp profile is set to docker/default or runtime/default",
+        "risk": "Missing seccomp profile reduces syscall-level isolation.",
+        "recommendation": "Set seccompProfile to RuntimeDefault where supported.",
+        "resource": "Pod.default.test-auto",
+        "evaluated_keys": [],
+        "reason": "This finding was not auto-applied because it requires application context or has no validated safe patch rule."
+      },
+      {
+        "check_id": "CKV_K8S_28",
+        "check_name": "Minimize the admission of containers with the NET_RAW capability",
+        "classification": "unknown",
+        "problem": "Minimize the admission of containers with the NET_RAW capability",
+        "risk": "This issue was detected by Checkov and should be reviewed using external policy guidance.",
+        "recommendation": "Retrieve external policy guidance and review the Kubernetes manifest manually.",
+        "resource": "Pod.default.test-auto",
+        "evaluated_keys": [
+          "spec/containers/[0]/securityContext/capabilities/drop"
+        ],
+        "reason": "This finding was not auto-applied because it requires application context or has no validated safe patch rule."
+      },
+      {
+        "check_id": "CKV_K8S_40",
+        "check_name": "Containers should run as a high UID to avoid host conflict",
+        "classification": "needs_context",
+        "problem": "Containers should run as a high UID to avoid host conflict",
+        "risk": "Low UIDs may conflict with host users or increase risk in some runtime configurations.",
+        "recommendation": "Set runAsUser to a high non-root UID after confirming application compatibility.",
+        "resource": "Pod.default.test-auto",
+        "evaluated_keys": [],
+        "reason": "This finding was not auto-applied because it requires application context or has no validated safe patch rule."
+      },
+      {
+        "check_id": "CKV2_K8S_6",
+        "check_name": "Minimize the admission of pods which lack an associated NetworkPolicy",
+        "classification": "needs_context",
+        "problem": "Minimize the admission of pods which lack an associated NetworkPolicy",
+        "risk": "Pods without NetworkPolicy may allow unrestricted network traffic.",
+        "recommendation": "Create a NetworkPolicy after confirming required ingress, egress, ports, namespaces, and pod labels.",
+        "resource": "Pod.default.test-auto",
+        "evaluated_keys": [
+          "resource_type"
+        ],
+        "reason": "This finding was not auto-applied because it requires application context or has no validated safe patch rule."
+      }
+    ],
+    "auto_patchable_count": 8,
+    "manual_recommendation_count": 11
+  },
+  "fixed_yaml": "apiVersion: v1\nkind: Pod\nmetadata:\n  name: test-auto\nspec:\n  containers:\n  - name: nginx\n    image: nginx:1.25\n    securityContext:\n      allowPrivilegeEscalation: false\n      capabilities:\n        drop:\n        - ALL\n      readOnlyRootFilesystem: true\n    resources:\n      requests:\n        memory: 128Mi\n        cpu: 100m\n      limits:\n        cpu: 500m\n        memory: 512Mi\n",
+  "trusted_report_after": {
+    "summary": "11 failed Checkov checks were detected.",
+    "total_failed_checks": 11,
+    "returned_findings": 11,
+    "issues": [
+      {
+        "check_id": "CKV_K8S_38",
+        "check_name": "Ensure that Service Account Tokens are only mounted where necessary",
+        "severity": "medium",
+        "classification": "auto_fixable",
+        "problem": "Ensure that Service Account Tokens are only mounted where necessary",
+        "risk": "Automatically mounted service account tokens may expose Kubernetes API credentials to workloads that do not need Kubernetes API access.",
+        "fix": "Set automountServiceAccountToken to false unless the pod needs Kubernetes API access.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/fixed/fixed-test-auto.yaml",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          21
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-35",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_15",
+        "check_name": "Image Pull Policy should be Always",
+        "severity": "medium",
+        "classification": "needs_context",
+        "problem": "Image Pull Policy should be Always",
+        "risk": "Image pull policy can affect image freshness and deployment behavior.",
+        "fix": "Set imagePullPolicy according to the deployment strategy.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/fixed/fixed-test-auto.yaml",
+        "evaluated_keys": [
+          "spec/containers/[0]/image",
+          "spec/containers/[0]/imagePullPolicy"
+        ],
+        "file_line_range": [
+          1,
+          21
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-14",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_9",
+        "check_name": "Readiness Probe Should be Configured",
+        "severity": "low",
+        "classification": "needs_context",
+        "problem": "Readiness Probe Should be Configured",
+        "risk": "Without a readiness probe, Kubernetes may send traffic to a pod before it is ready.",
+        "fix": "Add a readinessProbe based on the application's readiness endpoint or command.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/fixed/fixed-test-auto.yaml",
+        "evaluated_keys": [
+          "spec/containers/[0]/readinessProbe"
+        ],
+        "file_line_range": [
+          1,
+          21
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-8",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_8",
+        "check_name": "Liveness Probe Should be Configured",
+        "severity": "low",
+        "classification": "needs_context",
+        "problem": "Liveness Probe Should be Configured",
+        "risk": "Without a liveness probe, Kubernetes may not automatically restart an unhealthy container.",
+        "fix": "Add a livenessProbe based on the application's health endpoint or command.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/fixed/fixed-test-auto.yaml",
+        "evaluated_keys": [
+          "spec/containers/[0]/livenessProbe"
+        ],
+        "file_line_range": [
+          1,
+          21
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-7",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_29",
+        "check_name": "Apply security context to your pods and containers",
+        "severity": "medium",
+        "classification": "needs_context",
+        "problem": "Apply security context to your pods and containers",
+        "risk": "Missing pod/container security context weakens workload isolation.",
+        "fix": "Define pod and container securityContext settings such as runAsNonRoot and seccompProfile.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/fixed/fixed-test-auto.yaml",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          21
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/ensure-securitycontext-is-applied-to-pods-and-containers",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_43",
+        "check_name": "Image should use digest",
+        "severity": "medium",
+        "classification": "needs_context",
+        "problem": "Image should use digest",
+        "risk": "Image tags can change over time; digest pinning improves reproducibility.",
+        "fix": "Use an image digest after resolving the correct digest from the trusted container registry.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/fixed/fixed-test-auto.yaml",
+        "evaluated_keys": [
+          "spec/containers/[0]/image"
+        ],
+        "file_line_range": [
+          1,
+          21
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-39",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_21",
+        "check_name": "The default namespace should not be used",
+        "severity": "medium",
+        "classification": "needs_context",
+        "problem": "The default namespace should not be used",
+        "risk": "Running workloads in the default namespace weakens environment separation.",
+        "fix": "Move the workload to an application-specific namespace after confirming the correct namespace strategy.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/fixed/fixed-test-auto.yaml",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          21
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-20",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_23",
+        "check_name": "Minimize the admission of root containers",
+        "severity": "medium",
+        "classification": "needs_context",
+        "problem": "Minimize the admission of root containers",
+        "risk": "Running as root increases the impact of container compromise.",
+        "fix": "Set runAsNonRoot and runAsUser after confirming the application supports a non-root UID.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/fixed/fixed-test-auto.yaml",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          21
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-22",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_31",
+        "check_name": "Ensure that the seccomp profile is set to docker/default or runtime/default",
+        "severity": "medium",
+        "classification": "needs_context",
+        "problem": "Ensure that the seccomp profile is set to docker/default or runtime/default",
+        "risk": "Missing seccomp profile reduces syscall-level isolation.",
+        "fix": "Set seccompProfile to RuntimeDefault where supported.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/fixed/fixed-test-auto.yaml",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          21
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-29",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV_K8S_40",
+        "check_name": "Containers should run as a high UID to avoid host conflict",
+        "severity": "medium",
+        "classification": "needs_context",
+        "problem": "Containers should run as a high UID to avoid host conflict",
+        "risk": "Low UIDs may conflict with host users or increase risk in some runtime configurations.",
+        "fix": "Set runAsUser to a high non-root UID after confirming application compatibility.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/fixed/fixed-test-auto.yaml",
+        "evaluated_keys": [],
+        "file_line_range": [
+          1,
+          21
+        ],
+        "guideline": "https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc-k8s-37",
+        "confidence": "high"
+      },
+      {
+        "check_id": "CKV2_K8S_6",
+        "check_name": "Minimize the admission of pods which lack an associated NetworkPolicy",
+        "severity": "medium",
+        "classification": "needs_context",
+        "problem": "Minimize the admission of pods which lack an associated NetworkPolicy",
+        "risk": "Pods without NetworkPolicy may allow unrestricted network traffic.",
+        "fix": "Create a NetworkPolicy after confirming required ingress, egress, ports, namespaces, and pod labels.",
+        "resource": "Pod.default.test-auto",
+        "file_path": "/fixed/fixed-test-auto.yaml",
+        "evaluated_keys": [
+          "resource_type"
+        ],
+        "file_line_range": [
+          1,
+          21
+        ],
+        "guideline": null,
+        "confidence": "high"
+      }
+    ],
+    "final_recommendation": "Apply safe auto-fixable remediations, generate guidance for context-dependent findings, and rescan with Checkov."
+  },
+  "comparison": {
+    "before_count": 19,
+    "after_count": 11,
+    "fixed_count": 8,
+    "remaining_count": 11,
+    "new_count": 0,
+    "fixed_check_ids": [
+      "CKV_K8S_10",
+      "CKV_K8S_11",
+      "CKV_K8S_12",
+      "CKV_K8S_13",
+      "CKV_K8S_20",
+      "CKV_K8S_22",
+      "CKV_K8S_28",
+      "CKV_K8S_37"
+    ],
+    "remaining_check_ids": [
+      "CKV2_K8S_6",
+      "CKV_K8S_15",
+      "CKV_K8S_21",
+      "CKV_K8S_23",
+      "CKV_K8S_29",
+      "CKV_K8S_31",
+      "CKV_K8S_38",
+      "CKV_K8S_40",
+      "CKV_K8S_43",
+      "CKV_K8S_8",
+      "CKV_K8S_9"
+    ],
+    "new_check_ids": []
+  },
+  "llm_explanation": {
+    "summary": "The remediation resulted in a reduction of 8 out of 19 Kubernetes configurations, with 8 checks being fixed and no new checks being introduced.",
+    "fixed_explanation": "The following checks were successfully remediated: CKV_K8S_10, CKV_K8S_11, CKV_K8S_12, CKV_K8S_13, CKV_K8S_20, CKV_K8S_22, CKV_K8S_28, and CKV_K8S_37.",
+    "remaining_risks": "The following checks remain to be addressed: CKV2_K8S_6, CKV_K8S_15, CKV_K8S_21, CKV_K8S_23, CKV_K8S_29, CKV_K8S_31, CKV_K8S_38, CKV_K8S_40, CKV_K8S_43, CKV_K8S_8, and CKV_K8S_9.",
+    "next_step": "Review the remaining checks and implement necessary changes to address them. This may involve updating Kubernetes configurations, adjusting security policies, or implementing additional monitoring and logging."
+  },
+  "rag_unknown_analysis": {}
+}

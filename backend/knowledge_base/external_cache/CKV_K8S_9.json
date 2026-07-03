@@ -1,0 +1,20 @@
+{
+  "check_id": "CKV_K8S_9",
+  "check_name": "Readiness Probe Should be Configured",
+  "external_context": [
+    {
+      "source": "external_policy_context",
+      "url": "https://www.checkov.io/7.Scan%20Examples/Kubernetes.html",
+      "check_id": "CKV_K8S_9",
+      "check_name": "Readiness Probe Should be Configured",
+      "text": "External policy context for CKV_K8S_9\n\nCheck name:\nReadiness Probe Should be Configured\n\nProblem from trusted Checkov report:\nReadiness Probe Should be Configured\n\nRisk from trusted Checkov report:\nWithout a readiness probe, Kubernetes may send traffic to a pod before it is ready.\n\nFix from trusted Checkov report:\nAdd a readinessProbe based on the application's readiness endpoint or command.\n\nRelevant external extract:\n3  | kind: Pod\n4  | metadata:\n5  |   name: pod1\n6  | spec:\n7  |   containers:\n8  |   - name: main\n9  |     image: alpine\n10 |     command: [\"/bin/sleep\", \"999999\"]\nCheck: CKV_K8S_9: \"Readiness Probe Should be Configured\"\nFAILED for resource: Pod.default.pod1\nFile: /rootContainersFAILED.yaml:2-10\nGuide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/kubernetes-policies/kubernetes-policy-index/bc_k8s_8\n2  | apiVersion: v1"
+    },
+    {
+      "source": "external_policy_context",
+      "url": "https://github.com/bridgecrewio/checkov",
+      "check_id": "CKV_K8S_9",
+      "check_name": "Readiness Probe Should be Configured",
+      "text": "External policy context for CKV_K8S_9\n\nCheck name:\nReadiness Probe Should be Configured\n\nProblem from trusted Checkov report:\nReadiness Probe Should be Configured\n\nRisk from trusted Checkov report:\nWithout a readiness probe, Kubernetes may send traffic to a pod before it is ready.\n\nFix from trusted Checkov report:\nAdd a readinessProbe based on the application's readiness endpoint or command.\n\nRelevant external extract:\nNo exact external section found. Use trusted Checkov report as primary source."
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "CKV_K8S_16": {
+    "remediation_type": "automatic",
+    "path": "spec.containers.0.securityContext.privileged",
+    "action": "set",
+    "value": false,
+    "reason": "Privileged containers should be disabled with a deterministic boolean value."
+  },
+  "CKV_K8S_20": {
+    "remediation_type": "automatic",
+    "path": "spec.containers.0.securityContext.allowPrivilegeEscalation",
+    "action": "set",
+    "value": false,
+    "reason": "Privilege escalation can be disabled with a deterministic boolean value."
+  },
+  "CKV_K8S_10": {
+    "remediation_type": "automatic",
+    "path": "spec.containers.0.resources.requests.cpu",
+    "action": "set",
+    "value": "100m",
+    "reason": "A conservative CPU request can be added as a safe default."
+  },
+  "CKV_K8S_12": {
+    "remediation_type": "automatic",
+    "path": "spec.containers.0.resources.requests.memory",
+    "action": "set",
+    "value": "128Mi",
+    "reason": "A conservative memory request can be added as a safe default."
+  },
+  "CKV_K8S_11": {
+    "remediation_type": "automatic",
+    "path": "spec.containers.0.resources.limits.cpu",
+    "action": "set",
+    "value": "500m",
+    "reason": "A conservative CPU limit can be added as a safe default."
+  },
+  "CKV_K8S_13": {
+    "remediation_type": "automatic",
+    "path": "spec.containers.0.resources.limits.memory",
+    "action": "set",
+    "value": "512Mi",
+    "reason": "A conservative memory limit can be added as a safe default."
+  },
+  "CKV_K8S_37": {
+    "remediation_type": "automatic",
+    "path": "spec.containers.0.securityContext.capabilities.drop",
+    "action": "set",
+    "value": ["ALL"],
+    "reason": "Dropping all Linux capabilities is a deterministic hardening control."
+  },
+  "CKV_K8S_22": {
+    "remediation_type": "automatic",
+    "path": "spec.containers.0.securityContext.readOnlyRootFilesystem",
+    "action": "set",
+    "value": true,
+    "reason": "Read-only root filesystem can be enabled as a deterministic hardening control."
+  },
+  "CKV_K8S_38": {
+    "remediation_type": "manual",
+    "reason": "Disabling service account token mounting depends on whether the workload needs Kubernetes API access."
+  },
+  "CKV_K8S_8": {
+    "remediation_type": "manual",
+    "reason": "Liveness probe configuration depends on the application's health endpoint or command."
+  },
+  "CKV_K8S_9": {
+    "remediation_type": "manual",
+    "reason": "Readiness probe configuration depends on the application's readiness endpoint or command."
+  },
+  "CKV_K8S_15": {
+    "remediation_type": "manual",
+    "reason": "Image pull policy depends on deployment strategy."
+  },
+  "CKV_K8S_21": {
+    "remediation_type": "manual",
+    "reason": "The correct namespace depends on the organization's deployment strategy."
+  },
+  "CKV_K8S_23": {
+    "remediation_type": "manual",
+    "reason": "Non-root user settings require application compatibility validation."
+  },
+  "CKV_K8S_31": {
+    "remediation_type": "manual",
+    "reason": "Seccomp profile compatibility depends on runtime and Kubernetes version."
+  },
+  "CKV_K8S_40": {
+    "remediation_type": "manual",
+    "reason": "Choosing a high UID requires application compatibility validation."
+  },
+  "CKV_K8S_43": {
+    "remediation_type": "manual",
+    "reason": "Image digest must be resolved from the trusted container registry."
+  },
+  "CKV2_K8S_6": {
+    "remediation_type": "manual",
+    "reason": "NetworkPolicy requires application-specific ingress, egress, ports, labels, and namespace context."
+  }
+}

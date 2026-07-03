@@ -3,30 +3,10 @@ import re
 
 from app.services.llm_service import ask_llama
 from app.services.external_policy_service import get_context_for_check_id
-
-
-def select_patchable_issues(report: dict) -> list:
-    priority_ids = [
-        "CKV_K8S_16",
-        "CKV_K8S_20",
-        "CKV_K8S_10",
-        "CKV_K8S_12",
-        "CKV_K8S_11",
-        "CKV_K8S_13",
-        "CKV_K8S_38",
-        "CKV_K8S_37",
-        "CKV_K8S_22",
-    ]
-
-    issues = report.get("issues", [])
-    selected = []
-
-    for check_id in priority_ids:
-        for issue in issues:
-            if issue.get("check_id") == check_id:
-                selected.append(issue)
-
-    return selected[:5]
+from app.services.remediation_catalog_service import (
+    load_remediation_catalog,
+    get_catalog_entry,
+)
 
 
 def normalize_value(value):
@@ -99,232 +79,330 @@ def extract_json_from_llm_result(result):
     }
 
 
-def build_relevant_policy_context(issues: list, rag_context: list) -> str:
-    blocks = []
+def select_patchable_issues(report: dict) -> list:
+    selected = []
+    catalog = load_remediation_catalog()
 
-    for issue in issues:
-        check_id = issue.get("check_id", "")
-        matching_context = get_context_for_check_id(rag_context, check_id)
+    for issue in report.get("issues", []):
+        check_id = issue.get("check_id")
+        catalog_entry = catalog.get(check_id)
 
-        issue_block = f"""
-Finding:
-Check ID: {issue.get("check_id")}
-Check name: {issue.get("check_name")}
-Problem: {issue.get("problem")}
-Risk: {issue.get("risk")}
-Fix: {issue.get("fix")}
-Evaluated keys: {issue.get("evaluated_keys")}
-
-Relevant context:
-"""
-
-        if matching_context:
-            for context in matching_context[:2]:
-                issue_block += "\n---\n"
-                issue_block += context.get("text", "")[:1000]
-        else:
-            issue_block += "\nNo specific RAG/external context found. Use the trusted finding only."
-
-        blocks.append(issue_block.strip())
-
-    return "\n\n====================\n\n".join(blocks)
-
-
-def normalize_patch_plan(parsed_result: dict, allowed_check_ids: set) -> dict:
-    if not isinstance(parsed_result, dict):
-        return {
-            "error": "Parsed LLM result is not a dictionary",
-            "parsed_result": parsed_result,
-        }
-
-    if "error" in parsed_result:
-        return parsed_result
-
-    if "patches" in parsed_result and isinstance(parsed_result["patches"], list):
-        raw_patches = parsed_result["patches"]
-    else:
-        return {
-            "error": "Invalid patch plan structure",
-            "parsed_result": parsed_result,
-        }
-
-    valid_patches = []
-    rejected_patches = []
-
-    allowed_paths = {
-        "spec.automountServiceAccountToken",
-        "spec.containers.0.image",
-        "spec.containers.0.securityContext.privileged",
-        "spec.containers.0.securityContext.allowPrivilegeEscalation",
-        "spec.containers.0.securityContext.readOnlyRootFilesystem",
-        "spec.containers.0.securityContext.capabilities.drop",
-        "spec.containers.0.resources.requests.cpu",
-        "spec.containers.0.resources.requests.memory",
-        "spec.containers.0.resources.limits.cpu",
-        "spec.containers.0.resources.limits.memory",
-    }
-
-    for patch in raw_patches:
-        if not isinstance(patch, dict):
-            rejected_patches.append({
-                "patch": patch,
-                "reason": "Patch is not a dictionary",
-            })
+        if not catalog_entry:
             continue
 
-        check_id = patch.get("check_id")
+        if catalog_entry.get("remediation_type") == "automatic":
+            selected.append(issue)
 
-        if check_id not in allowed_check_ids:
-            rejected_patches.append({
-                "patch": patch,
-                "reason": "Rejected because check_id was not found in selected trusted findings",
-            })
+    return selected
+
+
+def build_manual_recommendations(report: dict) -> list:
+    recommendations = []
+    catalog = load_remediation_catalog()
+
+    for issue in report.get("issues", []):
+        check_id = issue.get("check_id")
+        catalog_entry = catalog.get(check_id)
+
+        if catalog_entry and catalog_entry.get("remediation_type") == "automatic":
             continue
 
-        path = normalize_path(patch.get("path", ""))
-        action = patch.get("action")
+        reason = "No supported automatic remediation exists for this finding."
 
-        if action != "set":
-            rejected_patches.append({
-                "patch": patch,
-                "reason": "Only action=set is supported",
-            })
-            continue
+        if catalog_entry:
+            reason = catalog_entry.get("reason", reason)
 
-        if not path:
-            rejected_patches.append({
-                "patch": patch,
-                "reason": "Missing path",
-            })
-            continue
-
-        if path not in allowed_paths:
-            rejected_patches.append({
-                "patch": patch,
-                "reason": f"Path is not allowed: {path}",
-            })
-            continue
-
-        if "value" not in patch:
-            rejected_patches.append({
-                "patch": patch,
-                "reason": "Missing value",
-            })
-            continue
-
-        valid_patches.append({
+        recommendations.append({
             "check_id": check_id,
-            "path": path,
-            "action": "set",
-            "value": normalize_value(patch.get("value")),
+            "check_name": issue.get("check_name"),
+            "classification": issue.get("classification"),
+            "problem": issue.get("problem"),
+            "risk": issue.get("risk"),
+            "recommendation": issue.get("fix"),
+            "resource": issue.get("resource"),
+            "evaluated_keys": issue.get("evaluated_keys"),
+            "remediation_type": "manual",
+            "reason": reason,
         })
 
-    return {
-        "patches": valid_patches,
-        "rejected_patches": rejected_patches,
+    return recommendations
+
+
+def build_policy_context_for_issue(issue: dict, rag_context: list) -> str:
+    check_id = issue.get("check_id", "")
+    matching_context = get_context_for_check_id(rag_context, check_id)
+
+    if not matching_context:
+        return "No specific RAG/external context found. Use the trusted finding and remediation catalog."
+
+    context_text = ""
+
+    for context in matching_context[:2]:
+        context_text += "\n---\n"
+        context_text += context.get("text", "")[:1200]
+
+    return context_text.strip()
+
+
+def build_single_issue_prompt(issue: dict, catalog_entry: dict, policy_context: str) -> str:
+    check_id = issue.get("check_id")
+
+    safe_rule = {
+        "path": catalog_entry.get("path"),
+        "action": catalog_entry.get("action", "set"),
+        "value": catalog_entry.get("value"),
     }
 
-
-def generate_patch_plan(trusted_report: dict, rag_context: list = None) -> dict:
-    if rag_context is None:
-        rag_context = []
-
-    issues = select_patchable_issues(trusted_report)
-
-    if not issues:
-        return {
-            "patches": [],
-            "rejected_patches": [],
-            "message": "No safely patchable issues found",
-        }
-
-    allowed_check_ids = {
-        issue.get("check_id")
-        for issue in issues
-        if issue.get("check_id")
-    }
-
-    policy_context = build_relevant_policy_context(
-        issues=issues,
-        rag_context=rag_context,
-    )
-
-    prompt = f"""
+    return f"""
 You are a Kubernetes YAML patch planner.
 
 Return ONLY valid JSON.
 Do not use markdown.
 Do not explain.
 
-You may ONLY create patches for these allowed check_ids:
-{json.dumps(list(allowed_check_ids), indent=2)}
+Generate exactly ONE patch for this supported automatic remediation.
 
-Every patch MUST contain:
-- check_id
-- path
-- action
-- value
+Trusted finding:
+Check ID: {issue.get("check_id")}
+Check name: {issue.get("check_name")}
+Classification from report: {issue.get("classification")}
+Problem: {issue.get("problem")}
+Risk: {issue.get("risk")}
+Fix from report: {issue.get("fix")}
+Evaluated keys: {issue.get("evaluated_keys")}
+Resource: {issue.get("resource")}
+
+Relevant policy context:
+{policy_context}
+
+Supported remediation catalog entry:
+{json.dumps(catalog_entry, indent=2)}
+
+You MUST use this exact safe patch:
+{json.dumps(safe_rule, indent=2)}
 
 Rules:
+- Return exactly one patch.
 - action must always be "set".
-- Do not invent check_ids.
-- Do not patch check_ids outside the allowed list.
-- Do not patch findings classified as needs_context.
-- If unsure, return an empty patches list.
-- Use dot notation paths only.
+- check_id must be "{check_id}".
+- path must be "{safe_rule["path"]}".
+- value must be exactly the catalog value.
+- Do not invent another path.
+- Do not invent another value.
 - Do not use slash paths.
 - Do not use [0] syntax.
 - Use containers.0 syntax.
-
-Relevant trusted findings and matched policy context:
-{policy_context}
-
-Allowed paths:
-- spec.automountServiceAccountToken
-- spec.containers.0.image
-- spec.containers.0.securityContext.privileged
-- spec.containers.0.securityContext.allowPrivilegeEscalation
-- spec.containers.0.securityContext.readOnlyRootFilesystem
-- spec.containers.0.securityContext.capabilities.drop
-- spec.containers.0.resources.requests.cpu
-- spec.containers.0.resources.requests.memory
-- spec.containers.0.resources.limits.cpu
-- spec.containers.0.resources.limits.memory
-
-Preferred safe default values:
-- allowPrivilegeEscalation: false
-- privileged: false
-- readOnlyRootFilesystem: true
-- capabilities.drop: ["ALL"]
-- automountServiceAccountToken: false
-- resources.requests.cpu: "250m"
-- resources.requests.memory: "256Mi"
-- resources.limits.cpu: "500m"
-- resources.limits.memory: "512Mi"
+- Do not generate patches for manual remediation findings.
 
 Return exactly this JSON schema:
 
 {{
   "patches": [
     {{
-      "check_id": "one of the allowed check_ids",
-      "path": "one allowed dot notation path",
+      "check_id": "{check_id}",
+      "path": "{safe_rule["path"]}",
       "action": "set",
-      "value": "correct value"
+      "value": {json.dumps(safe_rule["value"])}
     }}
   ]
 }}
 """
 
+
+def validate_single_patch(parsed_result: dict, issue: dict) -> dict:
+    check_id = issue.get("check_id")
+    catalog_entry = get_catalog_entry(check_id)
+
+    if not catalog_entry:
+        return {
+            "patches": [],
+            "rejected_patches": [{
+                "check_id": check_id,
+                "reason": "No remediation catalog entry exists for this check_id.",
+            }],
+        }
+
+    if catalog_entry.get("remediation_type") != "automatic":
+        return {
+            "patches": [],
+            "rejected_patches": [{
+                "check_id": check_id,
+                "reason": "Catalog entry is not automatic remediation.",
+            }],
+        }
+
+    if not isinstance(parsed_result, dict):
+        return {
+            "patches": [],
+            "rejected_patches": [{
+                "check_id": check_id,
+                "reason": "Parsed result is not a dictionary",
+                "parsed_result": parsed_result,
+            }],
+        }
+
+    if "error" in parsed_result:
+        return {
+            "patches": [],
+            "rejected_patches": [{
+                "check_id": check_id,
+                "reason": "LLM response could not be parsed",
+                "error": parsed_result,
+            }],
+        }
+
+    raw_patches = parsed_result.get("patches")
+
+    if not isinstance(raw_patches, list) or len(raw_patches) != 1:
+        return {
+            "patches": [],
+            "rejected_patches": [{
+                "check_id": check_id,
+                "reason": "Expected exactly one patch",
+                "parsed_result": parsed_result,
+            }],
+        }
+
+    patch = raw_patches[0]
+
+    if not isinstance(patch, dict):
+        return {
+            "patches": [],
+            "rejected_patches": [{
+                "check_id": check_id,
+                "reason": "Patch is not a dictionary",
+                "patch": patch,
+            }],
+        }
+
+    patch_check_id = patch.get("check_id")
+    action = patch.get("action")
+    path = normalize_path(patch.get("path", ""))
+    value = normalize_value(patch.get("value"))
+
+    expected_path = catalog_entry.get("path")
+    expected_action = catalog_entry.get("action", "set")
+    expected_value = catalog_entry.get("value")
+
+    if patch_check_id != check_id:
+        return {
+            "patches": [],
+            "rejected_patches": [{
+                "patch": patch,
+                "reason": f"Invalid check_id. Expected: {check_id}",
+            }],
+        }
+
+    if action != expected_action:
+        return {
+            "patches": [],
+            "rejected_patches": [{
+                "patch": patch,
+                "reason": f"Invalid action. Expected: {expected_action}",
+            }],
+        }
+
+    if path != expected_path:
+        return {
+            "patches": [],
+            "rejected_patches": [{
+                "patch": patch,
+                "reason": f"Invalid path. Expected: {expected_path}",
+            }],
+        }
+
+    if value != expected_value:
+        return {
+            "patches": [],
+            "rejected_patches": [{
+                "patch": patch,
+                "reason": f"Invalid value. Expected: {expected_value}",
+            }],
+        }
+
+    return {
+        "patches": [{
+            "check_id": check_id,
+            "path": expected_path,
+            "action": expected_action,
+            "value": expected_value,
+            "source": "remediation_catalog",
+        }],
+        "rejected_patches": [],
+    }
+
+
+def generate_patch_for_issue(issue: dict, rag_context: list) -> dict:
+    check_id = issue.get("check_id")
+    catalog_entry = get_catalog_entry(check_id)
+
+    if not catalog_entry:
+        return {
+            "patches": [],
+            "rejected_patches": [{
+                "check_id": check_id,
+                "reason": "No remediation catalog entry exists.",
+            }],
+        }
+
+    if catalog_entry.get("remediation_type") != "automatic":
+        return {
+            "patches": [],
+            "rejected_patches": [{
+                "check_id": check_id,
+                "reason": "Finding is not marked automatic in remediation catalog.",
+            }],
+        }
+
+    policy_context = build_policy_context_for_issue(
+        issue=issue,
+        rag_context=rag_context,
+    )
+
+    prompt = build_single_issue_prompt(
+        issue=issue,
+        catalog_entry=catalog_entry,
+        policy_context=policy_context,
+    )
+
     result = ask_llama(prompt)
 
-    print("\n===== PATCH PLAN RAW RESULT =====")
+    print(f"\n===== PATCH PLAN RAW RESULT FOR {check_id} =====")
     print(result)
-    print("=================================\n")
+    print("==============================================\n")
 
     parsed_result = extract_json_from_llm_result(result)
 
-    return normalize_patch_plan(
+    return validate_single_patch(
         parsed_result=parsed_result,
-        allowed_check_ids=allowed_check_ids,
+        issue=issue,
     )
+
+
+def generate_patch_plan(trusted_report: dict, rag_context: list = None) -> dict:
+    if rag_context is None:
+        rag_context = []
+
+    auto_patchable_issues = select_patchable_issues(trusted_report)
+    manual_recommendations = build_manual_recommendations(trusted_report)
+
+    all_patches = []
+    all_rejected_patches = []
+
+    for issue in auto_patchable_issues:
+        result = generate_patch_for_issue(
+            issue=issue,
+            rag_context=rag_context,
+        )
+
+        all_patches.extend(result.get("patches", []))
+        all_rejected_patches.extend(result.get("rejected_patches", []))
+
+    return {
+        "patches": all_patches,
+        "rejected_patches": all_rejected_patches,
+        "manual_recommendations": manual_recommendations,
+        "auto_patchable_count": len(auto_patchable_issues),
+        "manual_recommendation_count": len(manual_recommendations),
+        "catalog_based": True,
+    }
