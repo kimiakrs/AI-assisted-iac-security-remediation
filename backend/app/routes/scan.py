@@ -3,7 +3,7 @@ import shutil
 import logging
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
-
+from fastapi.responses import FileResponse
 from app.services.scanner_service import run_checkov
 from app.services.report_service import build_deterministic_report
 from app.services.patch_plan_service import generate_patch_plan
@@ -283,3 +283,14 @@ async def agent_remediate(filename: str, max_iterations: int = 3):
     logger.info("AGENT REMEDIATE - finished")
 
     return result
+
+@router.get("/report/download")
+async def download_report(path: str):
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    return FileResponse(
+        path,
+        media_type="application/json",
+        filename=os.path.basename(path),
+    )
