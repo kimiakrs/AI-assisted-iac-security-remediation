@@ -9,3 +9,19 @@ vector_store/
 models/
 *.log
 .DS_Store
+
+# Generated backend files
+backend/uploads/
+backend/fixed/
+backend/reports/
+backend/agent_runs/
+backend/knowledge_base/external_cache/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Python
+__pycache__/
+*.pyc
+venv/
